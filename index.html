@@ -193,6 +193,29 @@ body{
         </table>
 
     </div>
+</div>
+
+<div class="table-card" style="margin-top:25px;">
+
+    <h3>Ranking de Estabilidad</h3>
+
+    <table id="tablaEstabilidad">
+
+        <thead>
+            <tr>
+                <th>Líder</th>
+                <th>Promedio</th>
+                <th>CV %</th>
+                <th>Estabilidad</th>
+            </tr>
+        </thead>
+
+        <tbody></tbody>
+
+    </table>
+
+</div>
+
 
 </div>
 
@@ -268,6 +291,8 @@ async function cargarDatos(){
 
     let productoPromedios = {};
 
+    let estabilidad = {};
+
     rows.forEach(row=>{
 
         const cols = row.split(",");
@@ -292,6 +317,12 @@ async function cargarDatos(){
         const personas = hombres + mujeres;
 
         const kgxhxh = kg / (personas * horas);
+
+        if(!estabilidad[lider]){
+            estabilidad[lider] = [];
+        }
+
+        estabilidad[lider].push(kgxhxh);
 
         const fecha = cols[0].trim();
 
@@ -431,6 +462,56 @@ async function cargarDatos(){
         `;
 
     });
+
+
+    const tbodyEstabilidad =
+    document.querySelector("#tablaEstabilidad tbody");
+
+    if(tbodyEstabilidad){
+
+        tbodyEstabilidad.innerHTML = "";
+
+        let ranking = [];
+
+        Object.keys(estabilidad).forEach(lider=>{
+
+            const valores = estabilidad[lider];
+
+            const promedio =
+                valores.reduce((a,b)=>a+b,0)/valores.length;
+
+            const varianza =
+                valores.reduce((acc,v)=>acc+Math.pow(v-promedio,2),0)/valores.length;
+
+            const desviacion = Math.sqrt(varianza);
+
+            const cv = (desviacion/promedio)*100;
+
+            let nivel = "🔴 Baja";
+
+            if(cv < 10) nivel = "🟢 Excelente";
+            else if(cv < 20) nivel = "🟡 Buena";
+
+            ranking.push({lider,promedio,cv,nivel});
+
+        });
+
+        ranking.sort((a,b)=>a.cv-b.cv);
+
+        ranking.forEach(item=>{
+
+            tbodyEstabilidad.innerHTML += `
+            <tr>
+                <td>${item.lider}</td>
+                <td>${item.promedio.toFixed(1)}</td>
+                <td>${item.cv.toFixed(1)}%</td>
+                <td>${item.nivel}</td>
+            </tr>`;
+
+        });
+
+    }
+
 
     // GRAFICA
 
@@ -637,6 +718,12 @@ Object.keys(violinData).forEach(producto=>{
 
         });
 
+        let colorLinea = '#888';
+
+        if(lider === 'Juan Barron') colorLinea = '#ff6b6b';
+        if(lider === 'Mercedes Flores') colorLinea = '#ff9ff3';
+        if(lider === 'Ulises Martinez') colorLinea = '#4dabf7';
+
         tracesTendencia.push({
 
             type:'scatter',
@@ -647,11 +734,13 @@ Object.keys(violinData).forEach(producto=>{
             y: pares.map(p=>p.valor),
 
             line:{
-                width:3
+                width:3,
+                color:colorLinea
             },
 
             marker:{
-                size:8
+                size:8,
+                color:colorLinea
             }
 
         });
