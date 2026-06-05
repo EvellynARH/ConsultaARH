@@ -643,11 +643,18 @@ Object.keys(violinData).forEach(producto=>{
 
         });
 
-        let colorLinea = '#888';
+        const palette = [
+            '#ff6b6b','#4dabf7','#2ecc71','#f59f00','#9775fa',
+            '#20c997','#e64980','#845ef7','#fd7e14','#15aabf',
+            '#82c91e','#fa5252','#5c7cfa','#12b886','#cc5de8'
+        ];
 
-        if(lider === 'Juan Barron') colorLinea = '#ff6b6b';
-        if(lider === 'Mercedes Flores') colorLinea = '#ff9ff3';
-        if(lider === 'Ulises Martinez') colorLinea = '#4dabf7';
+        let hash = 0;
+        for(let i=0;i<clave.length;i++){
+            hash = clave.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        let colorLinea = palette[Math.abs(hash) % palette.length];
 
         tracesTendencia.push({
 
