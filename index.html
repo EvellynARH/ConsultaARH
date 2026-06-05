@@ -730,7 +730,10 @@ Object.keys(violinData).forEach(producto=>{
             mode:'lines+markers',
             name:clave,
 
-            x: pares.map(p=>p.fecha),
+            x: pares.map(p=>{
+                const [d,m,a] = p.fecha.split('/');
+                return `${a}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+            }),
             y: pares.map(p=>p.valor),
 
             line:{
@@ -771,7 +774,8 @@ Object.keys(violinData).forEach(producto=>{
             },
 
             xaxis:{
-                title:'Fecha'
+                title:'Fecha',
+                type:'date'
             },
 
             yaxis:{
