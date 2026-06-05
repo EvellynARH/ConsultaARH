@@ -195,29 +195,7 @@ body{
     </div>
 </div>
 
-<div class="table-card" style="margin-top:25px;">
 
-    <h3>Ranking de Estabilidad</h3>
-
-    <table id="tablaEstabilidad">
-
-        <thead>
-            <tr>
-                <th>Líder</th>
-                <th>Promedio</th>
-                <th>CV %</th>
-                <th>Estabilidad</th>
-            </tr>
-        </thead>
-
-        <tbody></tbody>
-
-    </table>
-
-</div>
-
-
-</div>
 
 <!-- CHART -->
 
@@ -337,7 +315,10 @@ async function cargarDatos(){
 
         }
 
-        tendencias[clave].x.push(fecha);
+        const [d,m,a] = fecha.split('/');
+        const fechaISO = `${a}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+
+        tendencias[clave].x.push(fechaISO);
         tendencias[clave].y.push(kgxhxh);
 
         // PRODUCTO
@@ -708,15 +689,7 @@ Object.keys(violinData).forEach(producto=>{
             valor:tendencias[clave].y[index]
         }));
 
-        pares.sort((a,b)=>{
-
-            const [da,ma,aa] = a.fecha.split("/");
-            const [db,mb,ab] = b.fecha.split("/");
-
-            return new Date(`${aa}-${ma}-${da}`) -
-                   new Date(`${ab}-${mb}-${db}`);
-
-        });
+        pares.sort((a,b)=> new Date(a.fecha) - new Date(b.fecha));
 
         let colorLinea = '#888';
 
@@ -730,10 +703,7 @@ Object.keys(violinData).forEach(producto=>{
             mode:'lines+markers',
             name:clave,
 
-            x: pares.map(p=>{
-                const [d,m,a] = p.fecha.split('/');
-                return `${a}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-            }),
+            x: pares.map(p=>p.fecha),
             y: pares.map(p=>p.valor),
 
             line:{
