@@ -269,7 +269,7 @@ async function cargarDatos(){
 
     let productoPromedios = {};
 
-    let estabilidad = {};
+    
 
     rows.forEach(row=>{
 
@@ -296,11 +296,7 @@ async function cargarDatos(){
 
         const kgxhxh = kg / (personas * horas);
 
-        if(!estabilidad[lider]){
-            estabilidad[lider] = [];
-        }
-
-        estabilidad[lider].push(kgxhxh);
+        
 
         const fecha = cols[0].trim();
 
@@ -315,10 +311,7 @@ async function cargarDatos(){
 
         }
 
-        const [d,m,a] = fecha.split('/');
-        const fechaISO = `${a}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-
-        tendencias[clave].x.push(fechaISO);
+        tendencias[clave].x.push(fecha);
         tendencias[clave].y.push(kgxhxh);
 
         // PRODUCTO
@@ -443,55 +436,6 @@ async function cargarDatos(){
         `;
 
     });
-
-
-    const tbodyEstabilidad =
-    document.querySelector("#tablaEstabilidad tbody");
-
-    if(tbodyEstabilidad){
-
-        tbodyEstabilidad.innerHTML = "";
-
-        let ranking = [];
-
-        Object.keys(estabilidad).forEach(lider=>{
-
-            const valores = estabilidad[lider];
-
-            const promedio =
-                valores.reduce((a,b)=>a+b,0)/valores.length;
-
-            const varianza =
-                valores.reduce((acc,v)=>acc+Math.pow(v-promedio,2),0)/valores.length;
-
-            const desviacion = Math.sqrt(varianza);
-
-            const cv = (desviacion/promedio)*100;
-
-            let nivel = "🔴 Baja";
-
-            if(cv < 10) nivel = "🟢 Excelente";
-            else if(cv < 20) nivel = "🟡 Buena";
-
-            ranking.push({lider,promedio,cv,nivel});
-
-        });
-
-        ranking.sort((a,b)=>a.cv-b.cv);
-
-        ranking.forEach(item=>{
-
-            tbodyEstabilidad.innerHTML += `
-            <tr>
-                <td>${item.lider}</td>
-                <td>${item.promedio.toFixed(1)}</td>
-                <td>${item.cv.toFixed(1)}%</td>
-                <td>${item.nivel}</td>
-            </tr>`;
-
-        });
-
-    }
 
 
     // GRAFICA
@@ -689,7 +633,15 @@ Object.keys(violinData).forEach(producto=>{
             valor:tendencias[clave].y[index]
         }));
 
-        pares.sort((a,b)=> new Date(a.fecha) - new Date(b.fecha));
+        pares.sort((a,b)=>{
+
+            const [da,ma,aa] = a.fecha.split("/");
+            const [db,mb,ab] = b.fecha.split("/");
+
+            return new Date(`${aa}-${ma}-${da}`) -
+                   new Date(`${ab}-${mb}-${db}`);
+
+        });
 
         let colorLinea = '#888';
 
@@ -745,7 +697,17 @@ Object.keys(violinData).forEach(producto=>{
 
             xaxis:{
                 title:'Fecha',
-                type:'date'
+                type:'category',
+                categoryorder:'array',
+                categoryarray:[...new Set(
+                    Object.values(tendencias)
+                    .flatMap(t=>t.x)
+                    .sort((a,b)=>{
+                        const [da,ma,aa]=a.split('/');
+                        const [db,mb,ab]=b.split('/');
+                        return new Date(`${aa}-${ma}-${da}`)-new Date(`${ab}-${mb}-${db}`);
+                    })
+                )]
             },
 
             yaxis:{
