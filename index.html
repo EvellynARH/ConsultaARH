@@ -673,13 +673,18 @@ Object.keys(violinData).forEach(producto=>{
             },
 
             marker:{
-                size:7,
+                size:8,
                 color:colorLinea,
                 line:{
                     color:'white',
                     width:1.5
                 }
-            }
+            },
+
+            hovertemplate:
+                '<b>%{fullData.name}</b><br>' +
+                'Fecha: %{x}<br>' +
+                'Kg/H/H: %{y:.2f}<extra></extra>'
 
         });
 
@@ -732,7 +737,7 @@ Object.keys(violinData).forEach(producto=>{
                 y:-0.25
             },
 
-            hovermode:'x unified',
+            hovermode:'closest',
 
             margin:{
                 t:80,
